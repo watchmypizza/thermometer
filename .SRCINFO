@@ -1,6 +1,7 @@
 pkgbase = thermometer
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors -- just in one package
 	pkgver = 1.2
 =======
@@ -20,6 +21,9 @@ pkgbase = thermometer
 =======
 	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors -- just in one package
 >>>>>>> 8a3b57f (AUR: add PKGBUILD)
+=======
+	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors -- just in one package
+>>>>>>> f011181 (chore: update .SRCINFO for packaging)
 	pkgver = 1.2
 >>>>>>> 5766904 (Repush everything)
 	pkgrel = 1
