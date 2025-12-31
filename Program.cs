@@ -43,20 +43,31 @@ namespace thermometer.Program
             {
                 if (System.IO.File.Exists(filePath))
                 {
-                    // Save package manager to yaml file
                     var workingDirectory = System.IO.Directory.GetCurrentDirectory();
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
-                    var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
-                    var yamlObject = new Dictionary<string, string>
+                    var deserializer = new DeserializerBuilder()
+                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                        .Build();
+
+                    Dictionary<string, string> existingConfig = new();
+
+                    if (System.IO.File.Exists(yamlFilePath))
                     {
-                        { "package_manager", pkgM },
-                        { "distribution", distroName },
-                        { "current_version", "1.0" }
-                    };
-                    var yamlContent = serializer.Serialize(yamlObject);
+                        var existingContent = System.IO.File.ReadAllText(yamlFilePath);
+                        existingConfig = deserializer.Deserialize<Dictionary<string, string>>(existingContent);
+                    }
+
+                    existingConfig["package_manager"] = pkgM;
+                    existingConfig["distribution"] = distroName;
+                    existingConfig["current_version"] = "1.1";
+
+                    var serializer = new SerializerBuilder()
+                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                        .Build();
+
+                    var yamlContent = serializer.Serialize(existingConfig);
                     System.IO.File.WriteAllText(yamlFilePath, yamlContent);
 
-                    // Return distro name with package manager
                     packageManager = pkgM;
                     return $"{distroName} (Package Manager: {pkgM})";
                 }
