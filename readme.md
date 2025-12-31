@@ -1,6 +1,6 @@
 # CPUPOWER
 
-A simple utility to streamline usage of [cpupower](https://github.com/deinstapel/cpupower/tree/master) ([GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)) with custom configuration and persistent CPU frequency management.
+A simple utility to streamline usage of [cpupower](https://github.com/deinstapel/cpupower/tree/master) ([GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)) and [lm_sensors](https://github.com/lm-sensors/lm-sensors) ([LGPL-2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html)) with custom configuration and persistent CPU frequency management.
 
 ## How It Works
 
@@ -14,6 +14,8 @@ Use at your own risk. I am not responsible for any damage caused by this tool.
 
 - [x] Basic arguments
 
-- [ ] Daemon
+- [x] LM Sensors implementation
 
-- ... and more coming in the future
+- [x] Daemon
+
+- [ ] and more coming in the future

@@ -21,7 +21,7 @@ namespace thermometer.Program
             {
                 var distro = checkDistro();
                 System.Console.WriteLine($"Distribution: {distro}");
-                bool successInstall = checkDependencies("cpupower");
+                bool successInstall = checkDependencies("cpupower, lm_sensors");
             }
             System.Console.WriteLine("Thermometer CPU control started.");
             CommandLineArguments.CommandLineArgs.ParseArgs(args);
@@ -59,7 +59,7 @@ namespace thermometer.Program
 
                     existingConfig["package_manager"] = pkgM;
                     existingConfig["distribution"] = distroName;
-                    existingConfig["current_version"] = "1.1";
+                    existingConfig["current_version"] = "1.2";
 
                     var serializer = new SerializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
