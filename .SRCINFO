@@ -1,5 +1,6 @@
 pkgbase = thermometer
 <<<<<<< HEAD
+<<<<<<< HEAD
 	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors -- just in one package
 	pkgver = 1.2
 =======
@@ -10,6 +11,17 @@ pkgbase = thermometer
 =======
 	pkgver = 1.2
 >>>>>>> 21a5471 (Changed .SRCINFO)
+=======
+<<<<<<< HEAD
+	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors - just in one package
+=======
+	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors -- just in one package
+>>>>>>> 8a3b57f (AUR: add PKGBUILD)
+=======
+	pkgdesc = A simple CPU frequency management utility using cpupower and lm_sensors -- just in one package
+>>>>>>> 8a3b57f (AUR: add PKGBUILD)
+	pkgver = 1.2
+>>>>>>> 5766904 (Repush everything)
 	pkgrel = 1
 	url = https://github.com/watchmypizza/thermometer
 	arch = x86_64

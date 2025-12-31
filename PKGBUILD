@@ -34,6 +34,7 @@ clean() {
   rm -rf "$srcdir"
   rm -rf "$pkgdir"
 }
+<<<<<<< HEAD
 
 pkgname=thermometer
 pkgver=1.1
@@ -71,3 +72,5 @@ clean() {
   rm -rf "$srcdir"
   rm -rf "$pkgdir"
 }
+=======
+>>>>>>> 5766904 (Repush everything)
