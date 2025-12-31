@@ -50,10 +50,14 @@ namespace thermometer.Program
                 if (System.IO.File.Exists(filePath))
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
                     var workingDirectory = defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
 =======
                     var workingDirectory = System.IO.Directory.GetCurrentDirectory();
 >>>>>>> a8c7643 (Added more arguments)
+=======
+                    var workingDirectory = defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+>>>>>>> 02669bd (Added a ABSOLUTE route to the config)
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     var deserializer = new DeserializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)

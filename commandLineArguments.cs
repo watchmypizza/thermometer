@@ -88,6 +88,7 @@ namespace thermometer.CommandLineArguments
                     }
 
                     var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+<<<<<<< HEAD
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
 
                     var yamlObject = ReadConfig(yamlFilePath);
@@ -313,6 +314,8 @@ namespace thermometer.CommandLineArguments
                     }
 
                     var workingDirectory = System.IO.Directory.GetCurrentDirectory();
+=======
+>>>>>>> 02669bd (Added a ABSOLUTE route to the config)
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
 
                     var yamlObject = ReadConfig(yamlFilePath);
@@ -367,7 +370,7 @@ namespace thermometer.CommandLineArguments
                         process.WaitForExit();
                     }
 
-                    var workingDirectory = System.IO.Directory.GetCurrentDirectory();
+                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     var yamlObject = ReadConfig(yamlFilePath);
                     yamlObject["cpu_min_frequency"] = GHz;
@@ -383,7 +386,7 @@ namespace thermometer.CommandLineArguments
 
                 if (arg.StartsWith("--status"))
                 {
-                    var workingDirectory = System.IO.Directory.GetCurrentDirectory();
+                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     if (System.IO.File.Exists(yamlFilePath))
                     {
@@ -414,7 +417,7 @@ namespace thermometer.CommandLineArguments
 
                 if (arg.StartsWith("--reset"))
                 {
-                    var workingDirectory = System.IO.Directory.GetCurrentDirectory();
+                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     if (System.IO.File.Exists(yamlFilePath))
                     {
