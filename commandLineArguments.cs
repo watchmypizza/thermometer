@@ -287,7 +287,6 @@ namespace thermometer.CommandLineArguments
 
         private static bool validateGHz(string ghz)
         {
-            // Simple validation to check if the format is correct (e.g., "2.5GHz")
             return System.Text.RegularExpressions.Regex.IsMatch(ghz, @"^\d+(\.\d+)?GHz$");
         }
     }
