@@ -49,7 +49,11 @@ namespace thermometer.Program
             {
                 if (System.IO.File.Exists(filePath))
                 {
+<<<<<<< HEAD
                     var workingDirectory = defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+=======
+                    var workingDirectory = System.IO.Directory.GetCurrentDirectory();
+>>>>>>> a8c7643 (Added more arguments)
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     var deserializer = new DeserializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -65,7 +69,11 @@ namespace thermometer.Program
 
                     existingConfig["package_manager"] = pkgM;
                     existingConfig["distribution"] = distroName;
+<<<<<<< HEAD
                     existingConfig["current_version"] = "1.2";
+=======
+                    existingConfig["current_version"] = "1.1";
+>>>>>>> a8c7643 (Added more arguments)
 
                     var serializer = new SerializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
