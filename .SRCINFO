@@ -4,8 +4,12 @@ pkgbase = thermometer
 	pkgver = 1.2
 =======
 	pkgdesc = A simple CPU frequency management utility
+<<<<<<< HEAD
 	pkgver = 1.1
 >>>>>>> 025c553 (Added .SRCINFO)
+=======
+	pkgver = 1.2
+>>>>>>> 21a5471 (Changed .SRCINFO)
 	pkgrel = 1
 	url = https://github.com/watchmypizza/thermometer
 	arch = x86_64
