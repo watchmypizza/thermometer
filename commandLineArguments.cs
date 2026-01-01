@@ -309,21 +309,6 @@ namespace thermometer.CommandLineArguments
                     System.Console.WriteLine("Thermometer version UNKNOWN");
                 }
 
-                if (arg.StartsWith("--help"))
-                {
-                    System.Console.WriteLine("Available command line arguments:");
-                    System.Console.WriteLine("--verbose : Enable verbose output.");
-                    System.Console.WriteLine("--max-ghz=<value> : Set the CPU max frequency (e.g., --max-ghz=2.5GHz).");
-                    System.Console.WriteLine("--min-ghz=<value> : Set the CPU min frequency (e.g., --min-ghz=1.0GHz).");
-                    System.Console.WriteLine("--help : Display this help message.");
-                    System.Console.WriteLine("--version : Display the current version of the application.");
-                    System.Console.WriteLine("--reset : Reset the configuration by deleting the config file.");
-                    System.Console.WriteLine("--status : Display the current configuration.");
-                    System.Console.WriteLine("--temperature : Display current sensor temperature readings.");
-                    System.Console.WriteLine("--install-daemon : Install the system daemon for automatic CPU frequency management.");
-                    System.Console.WriteLine("--daemon : Run Thermometer in daemon mode.");
-                }
-
                 if (arg.StartsWith("--reset"))
                 {
                     var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));

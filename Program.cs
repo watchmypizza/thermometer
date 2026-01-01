@@ -65,7 +65,7 @@ namespace thermometer.Program
 
                     existingConfig["package_manager"] = pkgM;
                     existingConfig["distribution"] = distroName;
-                    existingConfig["current_version"] = "1.3";
+                    existingConfig["current_version"] = "1.3.3";
                     var serializer = new SerializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
                         .Build();
