@@ -96,7 +96,7 @@ namespace thermometer.CommandLineArguments
         {
             var (mode, freq) = data;
 
-            string valueToWrite = freq > 0 ? ((long)freq).ToString() : mode;
+            string valueToWrite = freq> 0 ? ((long)freq).ToString() : mode;
 
             var paths = GetCpuFreqPaths();
 
@@ -150,7 +150,9 @@ namespace thermometer.CommandLineArguments
                             string raw = args[++i].ToLower().Replace("ghz", "");
                             if (double.TryParse(raw, out double val))
                             {
-                                SetCpu("scaling_max_freq", ("", val), existingConfig, "setMaxFreq", yamlFilePath);
+                                double khz = val * 1000000;
+
+                                SetCpu("scaling_max_freq", ("", khz), existingConfig, "setMaxFreq", yamlFilePath);
                                 Console.WriteLine($"Max frequency set to {val} GHz.");
                             }
                             else { Console.WriteLine("Invalid frequency."); }
@@ -163,7 +165,9 @@ namespace thermometer.CommandLineArguments
                             string raw = args[++i].ToLower().Replace("ghz", "");
                             if (double.TryParse(raw, out double val))
                             {
-                                SetCpu("scaling_min_freq", ("", val), existingConfig, "setMinFreq", yamlFilePath);
+                                double khz = val * 1000000;
+
+                                SetCpu("scaling_min_freq", ("", khz), existingConfig, "setMinFreq", yamlFilePath);
                                 Console.WriteLine($"Min frequency set to {val} GHz.");
                             }
                             else { Console.WriteLine("Invalid frequency."); }
