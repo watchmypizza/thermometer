@@ -3,6 +3,13 @@ using YamlDotNet.Serialization.NamingConventions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using thermometer.Program;
+using System.Security.AccessControl;
+using System.ComponentModel;
+using System.Drawing;
+using System.Net.NetworkInformation;
+using System.Security.Cryptography.X509Certificates;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace thermometer.CommandLineArguments
 {
@@ -12,8 +19,7 @@ namespace thermometer.CommandLineArguments
         public static string GHz { get; set; } = "2.5GHz";
         public static int safeMinKhz { get; set; } = 0600000;
         public static int safeMaxKhz { get; set; } = 2500000;
-        public static string cpuFreqDirectory { get; } = "/sys/devices/system/cpu/cpu0/cpufreq/";
-
+        public static string cpuDirs { get; } = "/sys/devices/system/cpu/cpu";
         private static Dictionary<string, string> ReadConfig(string yamlFilePath)
         {
             if (!System.IO.File.Exists(yamlFilePath))
@@ -25,6 +31,20 @@ namespace thermometer.CommandLineArguments
                 .Build();
 
             return deserializer.Deserialize<Dictionary<string, string>>(yamlContent) ?? new Dictionary<string, string>();
+        }
+
+        public static List<string> GetCpuFreqPaths()
+        {
+            var paths = new List<string>();
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
+                var path = System.IO.Path.Combine(cpuDirs + i.ToString(), "cpufreq");
+                if (System.IO.Directory.Exists(path))
+                {
+                    paths.Add(path);
+                }
+            }
+            return paths;
         }
 
         private static void WriteConfig(string yamlFilePath, Dictionary<string, string> config)
@@ -41,20 +61,26 @@ namespace thermometer.CommandLineArguments
         {
             double KHzValue = GHzValue * 1000000;
 
-            var max_freq_info = System.IO.Path.Combine(cpuFreqDirectory, "cpuinfo_max_freq");
-            var min_freq_info = System.IO.Path.Combine(cpuFreqDirectory, "cpuinfo_min_freq");
+            var paths = GetCpuFreqPaths();
 
-            var max_freq = double.Parse(System.IO.File.ReadAllText(max_freq_info));
-            var min_freq = double.Parse(System.IO.File.ReadAllText(min_freq_info));
+            foreach (var path in paths) {
 
-            if (KHzValue > max_freq || KHzValue < min_freq)
-            {
-                Console.WriteLine("Invalid amount. QUITTING.");
-                Console.WriteLine($"Allowed range: {min_freq / 1000000} GHz - {max_freq / 1000000} GHz");
-                Environment.Exit(1);
+                var max_freq_info = System.IO.Path.Combine(path, "cpuinfo_max_freq");
+                var min_freq_info = System.IO.Path.Combine(path, "cpuinfo_min_freq");
+
+                var max_freq = double.Parse(System.IO.File.ReadAllText(max_freq_info));
+                var min_freq = double.Parse(System.IO.File.ReadAllText(min_freq_info));
+
+                if (KHzValue > max_freq || KHzValue < min_freq)
+                {
+                    Console.WriteLine("Invalid amount. QUITTING.");
+                    Console.WriteLine($"Allowed range: {min_freq / 1000000} GHz - {max_freq / 1000000} GHz");
+                    Environment.Exit(1);
+                }
+
+                return KHzValue;
             }
-
-            return KHzValue;
+            return -1;
         }
 
         public static void parseArgs(string[] args)
@@ -90,17 +116,34 @@ namespace thermometer.CommandLineArguments
                             {
                                 double KHzValue = getKhz((double)GHzValue);
                                 existingConfig["setMaxFreq"] = KHzValue.ToString();
+
+                                var paths = GetCpuFreqPaths();
+
+                                foreach(var path in paths) {
+                                    if (verbose)
+                                    {
+                                        Regex ptrn = new Regex(@"\d+");
+                                        var match = ptrn.Match(path.ToString());
+
+                                        Console.WriteLine($"Writing core {match}...");
+                                    }
+                                    File.WriteAllText(System.IO.Path.Combine(path, "scaling_max_freq"), KHzValue.ToString());
+                                    if (verbose)
+                                    {
+                                        Console.WriteLine("Done.");
+                                    }
+                                }
+
                                 if (verbose)
                                 {
                                     System.Console.WriteLine($"VERBOSE: Writing YAML config for max freq: {KHzValue}");
                                     WriteConfig(yamlFilePath, existingConfig);
-                                    System.Console.WriteLine($"Setting CPU frequency to {KHzValue/1000000} GHz.");
+                                    System.Console.WriteLine($"CPU frequency set to {GHzValue} GHz ({KHzValue} KHz).");
                                 } else
                                 {
-                                    System.Console.WriteLine($"CPU frequency set to {GHzValue} GHz ({KHzValue} KHz).");
+                                    System.Console.WriteLine($"Setting CPU frequency to {KHzValue/1000000} GHz.");
                                 }
 
-                                File.WriteAllText(System.IO.Path.Combine(cpuFreqDirectory, "scaling_max_freq"), KHzValue.ToString());
                                 i++;
                             }
                             else
@@ -129,18 +172,35 @@ namespace thermometer.CommandLineArguments
                             {
                                 double KHzValue = getKhz((double)GHzValue);
                                 existingConfig["setMinFreq"] = KHzValue.ToString();
+
+                                var paths = GetCpuFreqPaths();
+
+                                foreach(var path in paths)
+                                {    
+                                    if (verbose)
+                                    {
+                                        Regex ptrn = new Regex(@"\d+");
+                                        var match = ptrn.Match(path.ToString());
+
+                                        Console.WriteLine($"Writing core {match}...");
+                                    }
+                                    File.WriteAllText(System.IO.Path.Combine(path, "scaling_max_freq"), KHzValue.ToString());
+                                    if (verbose)
+                                    {
+                                        Console.WriteLine("Done.");
+                                    }
+                                }
+
                                 if (verbose)
                                 {
                                     System.Console.WriteLine($"VERBOSE: Writing YAML config for min freq: {KHzValue}");
                                     WriteConfig(yamlFilePath, existingConfig);
-                                    System.Console.WriteLine($"Setting CPU minimum frequency to {KHzValue/1000000} GHz.");
+                                    System.Console.WriteLine($"CPU minimum frequency set to {GHzValue} GHz ({KHzValue} KHz).");
                                 } else
                                 {
-                                    System.Console.WriteLine($"CPU minimum frequency set to {GHzValue} GHz ({KHzValue} KHz).");
+                                    System.Console.WriteLine($"Setting CPU minimum frequency to {KHzValue/1000000} GHz.");
                                 }
-
-
-                                File.WriteAllText(System.IO.Path.Combine(cpuFreqDirectory, "scaling_min_freq"), KHzValue.ToString());
+                                
                                 i++;
                             }
                             else
@@ -160,10 +220,27 @@ namespace thermometer.CommandLineArguments
                         System.Console.WriteLine("--set-max-freq | -smf [value in GHz] : Set the maximum CPU frequency.");
                         System.Console.WriteLine("--set-min-freq | -smnf [value in GHz] : Set the minimum CPU frequency.");
                         System.Console.WriteLine("--help | -h : Display this help message.");
+                        System.Console.WriteLine("--version : Display the current version of Thermometer.");
+                        System.Console.WriteLine("--install-daemon | -id : Install and optionally enable the Thermometer daemon.");
                         break;
                     case "--daemon":
                     case "-d":
-                        thermometer.DaemonMode.Daemon.run();
+                        thermometer.Daemon.run();
+                        break;
+                    case "--version":
+                        var version = existingConfig.ContainsKey("current_version") ? existingConfig["current_version"] : "unknown";
+                        System.Console.WriteLine($"Thermometer Version: {version}");
+                        break;
+                    case "--install-daemon":
+                    case "-id":
+                        bool install = thermometer.Daemon.installDaemon();
+                        if(!install)
+                        {
+                            System.Console.WriteLine("Daemon installation failed.");
+                        } else
+                        {
+                            System.Console.WriteLine("Daemon installation succeeded.");
+                        }
                         break;
 
                     default:

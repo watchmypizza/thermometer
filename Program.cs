@@ -19,6 +19,12 @@ namespace thermometer.Program
             {
                 System.IO.Directory.CreateDirectory(workingDirectory);
             }
+            var paths = CommandLineArgs.GetCpuFreqPaths();
+            if (paths.Count == 0)
+            {
+                Console.WriteLine("No CPU frequency directories found. Incompatible device?");
+                Environment.Exit(1);
+            }
             System.Console.WriteLine("Checking dependencies...");
             // Check dependencies and look for matching packagemanager or OS
             var operatingSystem = System.Environment.OSVersion.Platform;
@@ -81,7 +87,7 @@ namespace thermometer.Program
 
                     existingConfig["package_manager"] = pkgM;
                     existingConfig["distribution"] = distroName;
-                    existingConfig["current_version"] = "1.3.3";
+                    existingConfig["current_version"] = "1.3.6";
                     var serializer = new SerializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
                         .Build();
