@@ -97,58 +97,6 @@ namespace thermometer.CommandLineArguments
                     System.Console.WriteLine("CPU max frequency set successfully.");
                 }
 
-                if (arg.StartsWith("--min-ghz="))
-                {
-                    GHz = arg.Split('=')[1];
-                    System.Console.WriteLine($"Setting CPU min frequency to: {GHz}");
-                    bool validation = validateGHz(GHz);
-
-                    if(!validation)
-                    {
-                        System.Console.WriteLine("Invalid GHz format. Please use the format like '1GHz'.");
-                        continue;
-                    }
-
-                    if (verbose)
-                    {
-                        var process = new System.Diagnostics.Process
-                        {
-                            StartInfo = new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = "sudo",
-                                Arguments = $"cpupower frequency-set -d {GHz}",
-                                RedirectStandardOutput = false,
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            }
-                        };
-                        process.Start();
-                        process.WaitForExit();
-                    } else
-                    {
-                        var process = new System.Diagnostics.Process
-                        {
-                            StartInfo = new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = "sudo",
-                                Arguments = $"cpupower frequency-set -d {GHz}",
-                                RedirectStandardOutput = true,
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            }
-                        };
-                        process.Start();
-                        process.WaitForExit();
-                    }
-
-                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
-                    var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
-                    var yamlObject = ReadConfig(yamlFilePath);
-                    yamlObject["cpu_min_frequency"] = GHz;
-                    WriteConfig(yamlFilePath, yamlObject);
-
-                    System.Console.WriteLine("CPU min frequency set successfully.");
-                }
 
                 if (arg.StartsWith("--status"))
                 {
