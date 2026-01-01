@@ -309,22 +309,6 @@ namespace thermometer.CommandLineArguments
                     System.Console.WriteLine("Thermometer version UNKNOWN");
                 }
 
-                if (arg.StartsWith("--status"))
-                {
-                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
-                    var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
-                    if (System.IO.File.Exists(yamlFilePath))
-                    {
-                        var yamlContent = System.IO.File.ReadAllText(yamlFilePath);
-                        System.Console.WriteLine("Current Configuration:");
-                        System.Console.WriteLine(yamlContent);
-                    }
-                    else
-                    {
-                        System.Console.WriteLine("Configuration file not found.");
-                    }
-                }
-
                 if (arg.StartsWith("--help"))
                 {
                     System.Console.WriteLine("Available command line arguments:");
