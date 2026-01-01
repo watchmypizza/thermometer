@@ -49,15 +49,7 @@ namespace thermometer.Program
             {
                 if (System.IO.File.Exists(filePath))
                 {
-<<<<<<< HEAD
-<<<<<<< HEAD
                     var workingDirectory = defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
-=======
-                    var workingDirectory = System.IO.Directory.GetCurrentDirectory();
->>>>>>> a8c7643 (Added more arguments)
-=======
-                    var workingDirectory = defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
->>>>>>> 02669bd (Added a ABSOLUTE route to the config)
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     var deserializer = new DeserializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -73,16 +65,7 @@ namespace thermometer.Program
 
                     existingConfig["package_manager"] = pkgM;
                     existingConfig["distribution"] = distroName;
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    existingConfig["current_version"] = "1.2";
-=======
-                    existingConfig["current_version"] = "1.1";
->>>>>>> a8c7643 (Added more arguments)
-=======
-                    existingConfig["current_version"] = "1.2";
->>>>>>> 5c0818b (Added daemon)
-
+                    existingConfig["current_version"] = "1.3";
                     var serializer = new SerializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
                         .Build();

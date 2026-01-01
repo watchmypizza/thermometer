@@ -21,15 +21,7 @@ namespace thermometer.DaemonMode
 
         public static void run()
         {
-<<<<<<< HEAD
-<<<<<<< HEAD
             var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
-=======
-            var workingDirectory = System.IO.Directory.GetCurrentDirectory();
->>>>>>> 5c0818b (Added daemon)
-=======
-            var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
->>>>>>> 02669bd (Added a ABSOLUTE route to the config)
             var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
             var config = ReadConfig(yamlFilePath);
             var maxGhz = config.ContainsKey("cpu_max_frequency") ? config["cpu_max_frequency"] : "2.5GHz";

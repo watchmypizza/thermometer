@@ -1,6 +1,7 @@
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace thermometer.CommandLineArguments
 {
@@ -55,7 +56,6 @@ namespace thermometer.CommandLineArguments
                     }
 
                     if (verbose)
-<<<<<<< HEAD
                     {
                         var process = new System.Diagnostics.Process
                         {
@@ -88,7 +88,6 @@ namespace thermometer.CommandLineArguments
                     }
 
                     var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
-<<<<<<< HEAD
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
 
                     var yamlObject = ReadConfig(yamlFilePath);
@@ -149,11 +148,6 @@ namespace thermometer.CommandLineArguments
                     WriteConfig(yamlFilePath, yamlObject);
 
                     System.Console.WriteLine("CPU min frequency set successfully.");
-                }
-
-                if (arg.StartsWith("--version"))
-                {
-                    System.Console.WriteLine("Thermometer version 1.2");
                 }
 
                 if (arg.StartsWith("--status"))
@@ -205,12 +199,10 @@ namespace thermometer.CommandLineArguments
                 if(arg.StartsWith("--temperature"))
                 {
                     var process = new System.Diagnostics.Process
-=======
->>>>>>> a8c7643 (Added more arguments)
                     {
-                        var process = new System.Diagnostics.Process
+
+                        StartInfo = new System.Diagnostics.ProcessStartInfo
                         {
-<<<<<<< HEAD
                             FileName = "sensors",
                             Arguments = "",
                             RedirectStandardOutput = true,
@@ -250,18 +242,11 @@ namespace thermometer.CommandLineArguments
                             {
                                 FileName = "/bin/bash",
                                 Arguments = "-c \"curl -fsSL https://raw.githubusercontent.com/watchmypizza/thermometer/main/thermometer.service | sudo tee /etc/systemd/system/thermometer.service > /dev/null\"",
-=======
-                            StartInfo = new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = "sudo",
-                                Arguments = $"cpupower frequency-set -u {GHz}",
->>>>>>> a8c7643 (Added more arguments)
                                 RedirectStandardOutput = false,
                                 UseShellExecute = false,
                                 CreateNoWindow = true
                             }
                         };
-<<<<<<< HEAD
 
                         process.Start();
                         process.WaitForExit();
@@ -293,29 +278,7 @@ namespace thermometer.CommandLineArguments
                 {
                     System.Console.WriteLine("Starting Thermometer in daemon mode...");
                     DaemonMode.Daemon.run();
-=======
-                        process.Start();
-                        process.WaitForExit();
-                    } else
-                    {
-                        var process = new System.Diagnostics.Process
-                        {
-                            StartInfo = new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = "sudo",
-                                Arguments = $"cpupower frequency-set -u {GHz}",
-                                RedirectStandardOutput = true,
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            }
-                        };
-                        process.Start();
-                        process.WaitForExit();
-                    }
-
-                    var workingDirectory = System.IO.Directory.GetCurrentDirectory();
-=======
->>>>>>> 02669bd (Added a ABSOLUTE route to the config)
+                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
 
                     var yamlObject = ReadConfig(yamlFilePath);
@@ -323,7 +286,6 @@ namespace thermometer.CommandLineArguments
                     WriteConfig(yamlFilePath, yamlObject);
 
                     System.Console.WriteLine("CPU max frequency set successfully.");
->>>>>>> a8c7643 (Added more arguments)
                 }
 
                 if (arg.StartsWith("--min-ghz="))
@@ -381,7 +343,22 @@ namespace thermometer.CommandLineArguments
 
                 if (arg.StartsWith("--version"))
                 {
-                    System.Console.WriteLine("Thermometer version 1.2");
+                    var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+                    var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
+                    if (System.IO.File.Exists(yamlFilePath))
+                    {
+                        var yamlContent = System.IO.File.ReadAllText(yamlFilePath);
+                        var deserializer = new DeserializerBuilder()
+                            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                            .Build();
+                        var config = deserializer.Deserialize<Dictionary<string, string>>(yamlContent);
+                        if (config != null && config.ContainsKey("current_version"))
+                        {
+                            System.Console.WriteLine($"Thermometer version {config["current_version"]}");
+                            continue;
+                        }
+                    }
+                    System.Console.WriteLine("Thermometer version UNKNOWN");
                 }
 
                 if (arg.StartsWith("--status"))
