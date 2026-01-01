@@ -24,8 +24,8 @@ namespace thermometer.DaemonMode
             var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
             var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
             var config = ReadConfig(yamlFilePath);
-            var maxGhz = config.ContainsKey("setMaxFreq") ? config["setMaxFreq"] : "2.5GHz";
-            var minGhz = config.ContainsKey("setMinFreq") ? config["setMinFreq"] : "1.0GHz";
+            var maxGhz = config.ContainsKey("setMaxFreq") ? config["setMaxFreq"] : "2500000";
+            var minGhz = config.ContainsKey("setMinFreq") ? config["setMinFreq"] : "1000000";
             var cpuMaxFreq = CommandLineArguments.CommandLineArgs.cpuFreqDirectory + "scaling_max_freq";
             var cpuMinFreq = CommandLineArguments.CommandLineArgs.cpuFreqDirectory + "scaling_min_freq";
 
