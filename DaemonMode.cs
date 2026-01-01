@@ -24,25 +24,15 @@ namespace thermometer.DaemonMode
             var workingDirectory = Program.ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
             var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
             var config = ReadConfig(yamlFilePath);
-            var maxGhz = config.ContainsKey("cpu_max_frequency") ? config["cpu_max_frequency"] : "2.5GHz";
-            var minGhz = config.ContainsKey("cpu_min_frequency") ? config["cpu_min_frequency"] : "1.0GHz";
+            var maxGhz = config.ContainsKey("setMaxFreq") ? config["setMaxFreq"] : "2.5GHz";
+            var minGhz = config.ContainsKey("setMinFreq") ? config["setMinFreq"] : "1.0GHz";
+            var cpuMaxFreq = CommandLineArguments.CommandLineArgs.cpuFreqDirectory + "scaling_max_freq";
+            var cpuMinFreq = CommandLineArguments.CommandLineArgs.cpuFreqDirectory + "scaling_min_freq";
 
             Console.Write("Applying settings... ");
 
-            var process = new System.Diagnostics.Process
-            {
-                StartInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = "sudo",
-                    Arguments = "cpupower frequency-set -u " + maxGhz + " -d " + minGhz,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
-
-            process.Start();
-            process.WaitForExit();
+            File.WriteAllText(cpuMaxFreq, maxGhz);
+            File.WriteAllText(cpuMinFreq, minGhz);
         }
     }
 }

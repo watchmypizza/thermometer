@@ -3,6 +3,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Collections.Generic;
 using thermometer.CommandLineArguments;
+using System.Security.Cryptography.X509Certificates;
 
 namespace thermometer.Program
 {
@@ -27,10 +28,24 @@ namespace thermometer.Program
             {
                 var distro = checkDistro();
                 System.Console.WriteLine($"Distribution: {distro}");
-                bool successInstall = checkDependencies("cpupower, lm_sensors");
             }
             System.Console.WriteLine("Thermometer CPU control started.");
-            CommandLineArguments.CommandLineArgs.ParseArgs(args);
+            CommandLineArguments.CommandLineArgs.parseArgs(args);
+        }
+
+        public static bool getSudo()
+        {
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                if(Environment.UserName != "root")
+                {
+                    System.Console.WriteLine("This action requires elevated privileges. Please run with sudo.");
+                    Environment.Exit(1);
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
 
         public static string checkDistro()
@@ -49,6 +64,7 @@ namespace thermometer.Program
             {
                 if (System.IO.File.Exists(filePath))
                 {
+                    getSudo();
                     var workingDirectory = defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
                     var yamlFilePath = System.IO.Path.Combine(workingDirectory, "thermometer_config.yaml");
                     var deserializer = new DeserializerBuilder()
@@ -79,86 +95,6 @@ namespace thermometer.Program
             }
 
             return "Unknown";
-        }
-
-        public static bool checkDependencies(string dependencies)
-        {
-            if (packageManager == "unknown")
-            {
-                return false;
-            }
-
-            var depsList = dependencies.Split(',');
-            foreach (var dep in depsList)
-            {
-                var trimmedDep = dep.Trim();
-                var command = packageManager switch
-                {
-                    "apt-get" => "dpkg -s ",
-                    "yum" => "rpm -q ",
-                    "pacman" => "pacman -Qi ",
-                    "emerge" => "equery list ",
-                    "zypp" => "zypper se -i ",
-                    "apk" => "apk info | grep ",
-                    _ => ""
-                };
-                var process = new System.Diagnostics.Process
-                {
-                    StartInfo = new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = "sudo",
-                        Arguments = command + trimmedDep,
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    }
-                };
-                process.Start();
-                string result = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    System.Console.WriteLine($"Dependency missing: {trimmedDep}");
-                    System.Console.WriteLine($"Do you want to install it now? (y/n): ");
-                    var input = System.Console.ReadLine();
-
-                    if (input != null && input.ToLower() == "y")
-                    {
-                        var installCommand = packageManager switch
-                        {
-                            "apt-get" => $"sudo apt-get install -y {trimmedDep}",
-                            "yum" => $"sudo yum install -y {trimmedDep}",
-                            "pacman" => $"sudo pacman -S --noconfirm {trimmedDep}",
-                            "emerge" => $"sudo emerge {trimmedDep}",
-                            "zypp" => $"sudo zypper install -y {trimmedDep}",
-                            "apk" => $"sudo apk add {trimmedDep}",
-                            _ => ""
-                        };
-                        var installProcess = new System.Diagnostics.Process
-                        {
-                            StartInfo = new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = "/bin/bash",
-                                Arguments = $"-c \"{installCommand}\"",
-                                RedirectStandardOutput = true,
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            }
-                        };
-                        installProcess.Start();
-                        string installResult = installProcess.StandardOutput.ReadToEnd();
-                        installProcess.WaitForExit();
-                        System.Console.WriteLine(installResult);
-                    }
-                    else
-                    {
-                        System.Console.WriteLine("Installation skipped. Exiting.");
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
     }
 }
