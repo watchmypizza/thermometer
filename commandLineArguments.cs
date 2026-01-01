@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Diagnostics;
+using System.Xml.Serialization;
 
 namespace thermometer.CommandLineArguments
 {
@@ -47,6 +48,12 @@ namespace thermometer.CommandLineArguments
                 }
             }
             return paths;
+        }
+
+        public static bool? checkDirectory(string directory)
+        {
+            try { return Directory.Exists(directory); }
+            catch (Exception) { return null; }
         }
 
         private static void WriteConfig(string yamlFilePath, Dictionary<string, string> config)
@@ -85,6 +92,40 @@ namespace thermometer.CommandLineArguments
             return -1;
         }
 
+        private static void SetCpu(string targetFile, (string mode, double freq) data, Dictionary<string, string> config, string configKey, string yamlPath)
+        {
+            var (mode, freq) = data;
+
+            string valueToWrite = freq > 0 ? ((long)freq).ToString() : mode;
+
+            var paths = GetCpuFreqPaths();
+
+            foreach (var path in paths)
+            {
+                if (!(checkDirectory(path) ?? false))
+                {
+                    Console.WriteLine($"CPU Core at {path} is offline, skipping.");
+                    continue;
+                }
+
+                if (verbose)
+                {
+                    var match = Regex.Match(path, @"\d+");
+                    Console.WriteLine($"Writing {valueToWrite} to {targetFile} on core {match}...");
+                }
+
+                File.WriteAllText(Path.Combine(path, targetFile), valueToWrite);
+                
+                if (verbose) Console.WriteLine("Done.");
+            }
+
+            if (!string.IsNullOrEmpty(configKey))
+            {
+                config[configKey] = valueToWrite;
+                WriteConfig(yamlPath, config);
+            }
+        }
+
         public static void parseArgs(string[] args)
         {
             var workingDirectory = ThermometerApp.defaultConfigPath.Replace("~", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
@@ -106,113 +147,26 @@ namespace thermometer.CommandLineArguments
                     case "-smf":
                         if (i + 1 < args.Length)
                         {
-                            if (verbose) {
-                                Console.WriteLine($"VERBOSE: {args[i + 1]}");
-                            }
-                            GHz = args[i + 1];
-                            if(GHz.ToLower().Contains("ghz"))
+                            string raw = args[++i].ToLower().Replace("ghz", "");
+                            if (double.TryParse(raw, out double val))
                             {
-                                GHz = GHz.ToLower().Replace("ghz", "");
+                                SetCpu("scaling_max_freq", ("", val), existingConfig, "setMaxFreq", yamlFilePath);
+                                Console.WriteLine($"Max frequency set to {val} GHz.");
                             }
-                            if (double.TryParse(GHz, out double GHzValue))
-                            {
-                                double KHzValue = getKhz((double)GHzValue);
-                                existingConfig["setMaxFreq"] = KHzValue.ToString();
-
-                                var paths = GetCpuFreqPaths();
-
-                                foreach(var path in paths) {
-                                    if (verbose)
-                                    {
-                                        Regex ptrn = new Regex(@"\d+");
-                                        var match = ptrn.Match(path.ToString());
-
-                                        Console.WriteLine($"Writing core {match}...");
-                                    }
-                                    File.WriteAllText(System.IO.Path.Combine(path, "scaling_max_freq"), KHzValue.ToString());
-                                    if (verbose)
-                                    {
-                                        Console.WriteLine("Done.");
-                                    }
-                                }
-
-                                if (verbose)
-                                {
-                                    System.Console.WriteLine($"VERBOSE: Writing YAML config for max freq: {KHzValue}");
-                                    WriteConfig(yamlFilePath, existingConfig);
-                                    System.Console.WriteLine($"CPU frequency set to {GHzValue} GHz ({KHzValue} KHz).");
-                                } else
-                                {
-                                    System.Console.WriteLine($"Setting CPU frequency to {KHzValue/1000000} GHz.");
-                                }
-
-                                i++;
-                            }
-                            else
-                            {
-                                System.Console.WriteLine("Invalid frequency value provided.");
-                            }
-                        }
-                        else
-                        {
-                            System.Console.WriteLine("No frequency value provided.");
+                            else { Console.WriteLine("Invalid frequency."); }
                         }
                         break;
                     case "--set-min-freq":
                     case "-smnf":
                         if (i + 1 < args.Length)
                         {
-                            if (verbose) {
-                                Console.WriteLine($"VERBOSE: {args[i + 1]}");
-                            }
-                            GHz = args[i + 1];
-                            if(GHz.ToLower().Contains("ghz"))
+                            string raw = args[++i].ToLower().Replace("ghz", "");
+                            if (double.TryParse(raw, out double val))
                             {
-                                GHz = GHz.ToLower().Replace("ghz", "");
+                                SetCpu("scaling_min_freq", ("", val), existingConfig, "setMinFreq", yamlFilePath);
+                                Console.WriteLine($"Min frequency set to {val} GHz.");
                             }
-                            if (double.TryParse(GHz, out double GHzValue))
-                            {
-                                double KHzValue = getKhz((double)GHzValue);
-                                existingConfig["setMinFreq"] = KHzValue.ToString();
-
-                                var paths = GetCpuFreqPaths();
-
-                                foreach(var path in paths)
-                                {    
-                                    if (verbose)
-                                    {
-                                        Regex ptrn = new Regex(@"\d+");
-                                        var match = ptrn.Match(path.ToString());
-
-                                        Console.WriteLine($"Writing core {match}...");
-                                    }
-                                    File.WriteAllText(System.IO.Path.Combine(path, "scaling_max_freq"), KHzValue.ToString());
-                                    if (verbose)
-                                    {
-                                        Console.WriteLine("Done.");
-                                    }
-                                }
-
-                                if (verbose)
-                                {
-                                    System.Console.WriteLine($"VERBOSE: Writing YAML config for min freq: {KHzValue}");
-                                    WriteConfig(yamlFilePath, existingConfig);
-                                    System.Console.WriteLine($"CPU minimum frequency set to {GHzValue} GHz ({KHzValue} KHz).");
-                                } else
-                                {
-                                    System.Console.WriteLine($"Setting CPU minimum frequency to {KHzValue/1000000} GHz.");
-                                }
-                                
-                                i++;
-                            }
-                            else
-                            {
-                                System.Console.WriteLine("Invalid frequency value provided.");
-                            }
-                        }
-                        else
-                        {
-                            System.Console.WriteLine("No frequency value provided.");
+                            else { Console.WriteLine("Invalid frequency."); }
                         }
                         break;
                     case "--help":
@@ -224,6 +178,7 @@ namespace thermometer.CommandLineArguments
                         System.Console.WriteLine("--help | -h : Display this help message.");
                         System.Console.WriteLine("--version : Display the current version of Thermometer.");
                         System.Console.WriteLine("--install-daemon | -id : Install and optionally enable the Thermometer daemon.");
+                        System.Console.WriteLine("--mode | -m : Set a CPU mode like performance.");
                         break;
                     case "--daemon":
                     case "-d":
@@ -248,46 +203,35 @@ namespace thermometer.CommandLineArguments
                     case "-m":
                         if (i + 1 < args.Length)
                         {
-                            if (verbose)
+                            string selectedMode = args[++i];
+                            string availableGovPath = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors";
+
+                            if (!File.Exists(availableGovPath))
                             {
-                                Console.WriteLine($"VERBOSE: {args[i + 1]}");
+                                Console.WriteLine("Error: CPU frequency scaling is not supported on this system.");
+                                break; 
                             }
 
-                            var mode = args[i + 1];
-                            var modeDir = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors";
-                            var paths = GetCpuFreqPaths();
-                            if (!File.Exists(modeDir))
+                            var modes = File.ReadAllText(availableGovPath).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                            if (!modes.Contains(selectedMode))
                             {
-                                Console.WriteLine("The available_governors file does either not exist, or your CPU doesn't support it.");
-                            }
-                            var fileText = File.ReadAllText(modeDir).Trim().Split(" ");
-                            List<string> modes = [.. fileText];
-                            if(!modes.Contains(mode))
-                            {
-                                Console.WriteLine($"Mode doesn't exist: {mode}");
+                                Console.WriteLine($"Mode '{selectedMode}' doesn't exist.");
                                 Console.WriteLine($"Available Modes: {string.Join(", ", modes)}");
                                 Environment.Exit(1);
                             }
-                            foreach(var path in paths)
-                            {
-                                if (verbose)
-                                {
-                                    Regex ptrn = new Regex(@"\d+");
-                                    var core = ptrn.Match(path.ToString());
-                                    Console.WriteLine($"Applying governor for cpu core {core}...");
-                                }
-                                var finalPath = Path.Combine(path, "scaling_governor");
-                                File.WriteAllText(finalPath, mode);
-                                if (verbose)
-                                {
-                                    Console.WriteLine("Done.");
-                                }
-                            }
 
-                            Console.WriteLine($"Applied mode {mode} to the CPU.");
+                            var paths = GetCpuFreqPaths();
+                            SetCpu("scaling_governor", (selectedMode, 0), existingConfig, "selectedMode", yamlFilePath);
+
+                            Console.WriteLine($"Applied mode {selectedMode} to the CPU.");
                         }
-                        i++;
+                        else
+                        {
+                            Console.WriteLine("Error: No mode specified.");
+                        }
                         break;
+
 
                     default:
                         System.Console.WriteLine($"Unknown argument: {args[i]}");

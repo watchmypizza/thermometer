@@ -33,12 +33,14 @@ namespace thermometer
             var config = ReadConfig(yamlFilePath);
             var maxGhz = config.ContainsKey("setMaxFreq") ? config["setMaxFreq"] : "2500000";
             var minGhz = config.ContainsKey("setMinFreq") ? config["setMinFreq"] : "1000000";
+            var governor = config.ContainsKey("selectedMode") ? config["selectedMode"] : "powersave";
 
             var paths = CommandLineArgs.GetCpuFreqPaths();
 
             foreach (var path in paths) {
                 var cpuMaxFreq = Path.Combine(path, "scaling_max_freq");
                 var cpuMinFreq = Path.Combine(path, "scaling_min_freq");
+                var scalingMode = Path.Combine(path, "scaling_governor");
 
                 Regex ptrn = new Regex(@"\d+");
                 var match = ptrn.Match(path.ToString());
@@ -47,6 +49,7 @@ namespace thermometer
 
                 File.WriteAllText(cpuMaxFreq, maxGhz);
                 File.WriteAllText(cpuMinFreq, minGhz);
+                File.WriteAllText(scalingMode, governor);
 
                 Console.WriteLine("Done.");
             }
