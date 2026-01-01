@@ -33,6 +33,8 @@ namespace thermometer.DaemonMode
 
             File.WriteAllText(cpuMaxFreq, maxGhz);
             File.WriteAllText(cpuMinFreq, minGhz);
+
+            Console.WriteLine("Done.");
         }
     }
 }
