@@ -10,6 +10,8 @@ using System.Net.NetworkInformation;
 using System.Security.Cryptography.X509Certificates;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Timers;
+using System.Diagnostics;
 
 namespace thermometer.CommandLineArguments
 {
@@ -241,6 +243,50 @@ namespace thermometer.CommandLineArguments
                         {
                             System.Console.WriteLine("Daemon installation succeeded.");
                         }
+                        break;
+                    case "--mode":
+                    case "-m":
+                        if (i + 1 < args.Length)
+                        {
+                            if (verbose)
+                            {
+                                Console.WriteLine($"VERBOSE: {args[i + 1]}");
+                            }
+
+                            var mode = args[i + 1];
+                            var modeDir = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors";
+                            var paths = GetCpuFreqPaths();
+                            if (!File.Exists(modeDir))
+                            {
+                                Console.WriteLine("The available_governors file does either not exist, or your CPU doesn't support it.");
+                            }
+                            var fileText = File.ReadAllText(modeDir).Trim().Split(" ");
+                            List<string> modes = [.. fileText];
+                            if(!modes.Contains(mode))
+                            {
+                                Console.WriteLine($"Mode doesn't exist: {mode}");
+                                Console.WriteLine($"Available Modes: {string.Join(", ", modes)}");
+                                Environment.Exit(1);
+                            }
+                            foreach(var path in paths)
+                            {
+                                if (verbose)
+                                {
+                                    Regex ptrn = new Regex(@"\d+");
+                                    var core = ptrn.Match(path.ToString());
+                                    Console.WriteLine($"Applying governor for cpu core {core}...");
+                                }
+                                var finalPath = Path.Combine(path, "scaling_governor");
+                                File.WriteAllText(finalPath, mode);
+                                if (verbose)
+                                {
+                                    Console.WriteLine("Done.");
+                                }
+                            }
+
+                            Console.WriteLine($"Applied mode {mode} to the CPU.");
+                        }
+                        i++;
                         break;
 
                     default:
