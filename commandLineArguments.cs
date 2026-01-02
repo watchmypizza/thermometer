@@ -14,6 +14,8 @@ using System.Timers;
 using System.Diagnostics;
 using System.Xml.Serialization;
 using System.Security;
+using System.Data.SqlTypes;
+using System.Reflection;
 
 namespace thermometer.CommandLineArguments
 {
@@ -305,7 +307,7 @@ namespace thermometer.CommandLineArguments
                                 Console.WriteLine($"VERBOSE: Reading {tempPath}");
                             }
                             var tempInput = File.ReadAllText(tempPath) ?? "UNKNOWN TEMPERATURE";
-                            int.TryParse(tempInput.ToString(), out int temperatureResult);
+                            double.TryParse(tempInput.ToString(), out double temperatureResult);
 
                             Console.WriteLine("------------------------------");
                             Console.WriteLine($"Device Name: {deviceName}");
