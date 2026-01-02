@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using System.Diagnostics;
 using System.Xml.Serialization;
+using System.Security;
 
 namespace thermometer.CommandLineArguments
 {
@@ -235,7 +236,23 @@ namespace thermometer.CommandLineArguments
                             Console.WriteLine("Error: No mode specified.");
                         }
                         break;
+                    case "--list-modes":
+                    case "-lm":
+                        string availableGovernors = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors";
 
+                        if(!File.Exists(availableGovernors))
+                        {
+                            Console.WriteLine("Error: CPU frequency scaling is not supported on this system.");
+                            Environment.Exit(1);
+                        }
+                        if(verbose)
+                        {
+                            Console.WriteLine("Reading /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors");
+                        }
+                        var availModes = File.ReadAllText(availableGovernors).Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+                        Console.WriteLine($"Available Modes: {string.Join(", ", availModes)}");
+                        break;
 
                     default:
                         System.Console.WriteLine($"Unknown argument: {args[i]}");

@@ -13,6 +13,7 @@ namespace thermometer
 {
     public class Daemon
     {
+        private static readonly Regex ptrn = new Regex(@"\d+", RegexOptions.Compiled);
         private static Dictionary<string, string> ReadConfig(string yamlFilePath)
         {
             if (!System.IO.File.Exists(yamlFilePath))
@@ -42,17 +43,38 @@ namespace thermometer
                 var cpuMinFreq = Path.Combine(path, "scaling_min_freq");
                 var scalingMode = Path.Combine(path, "scaling_governor");
 
-                Regex ptrn = new Regex(@"\d+");
                 var match = ptrn.Match(path.ToString());
+                bool check = CheckDirectories(path);
+                bool checkFile = fileCheck([cpuMaxFreq, cpuMinFreq, scalingMode]);
 
-                Console.Write($"Applying settings for core {match}...");
+                if(!check || !checkFile)
+                {
+                    Console.WriteLine($"Check failed: {path}");
+                    continue;
+                }
 
-                File.WriteAllText(cpuMaxFreq, maxGhz);
-                File.WriteAllText(cpuMinFreq, minGhz);
-                File.WriteAllText(scalingMode, governor);
+                Console.Write($"Applying settings for core {match.Value}...");
+                try {
+                    File.WriteAllText(cpuMaxFreq, maxGhz);
+                    File.WriteAllText(cpuMinFreq, minGhz);
+                    File.WriteAllText(scalingMode, governor);
 
-                Console.WriteLine("Done.");
+                    Console.WriteLine("Done.");
+                } catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR on Core {match.Value}: {e}");
+                }
             }
+        }
+
+        public static bool CheckDirectories(string path)
+        {
+            return Directory.Exists(path);
+        }
+
+        public static bool fileCheck(IEnumerable<string> path)
+        {
+            return path.All(File.Exists);
         }
 
         public static bool installDaemon()
