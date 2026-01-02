@@ -20,7 +20,7 @@ namespace thermometer.Program
                 System.IO.Directory.CreateDirectory(workingDirectory);
             }
             var paths = CommandLineArgs.GetCpuFreqPaths();
-            if (paths.Count == 0)
+            if (paths.Count <= 0)
             {
                 Console.WriteLine("No CPU frequency directories found. Incompatible device?");
                 Environment.Exit(1);
