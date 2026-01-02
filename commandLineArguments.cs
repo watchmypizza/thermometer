@@ -24,6 +24,7 @@ namespace thermometer.CommandLineArguments
         public static int safeMinKhz { get; set; } = 0600000;
         public static int safeMaxKhz { get; set; } = 2500000;
         public static string cpuDirs { get; } = "/sys/devices/system/cpu/cpu";
+        public static string tempDirs { get; } = "/sys/class/hwmon/hwmon";
         private static Dictionary<string, string> ReadConfig(string yamlFilePath)
         {
             if (!System.IO.File.Exists(yamlFilePath))
@@ -46,6 +47,24 @@ namespace thermometer.CommandLineArguments
                 if (System.IO.Directory.Exists(path))
                 {
                     paths.Add(path);
+                }
+            }
+            return paths;
+        }
+
+        public static List<string> GetTemperaturePaths()
+        {
+            var paths = new List<string>();
+
+            for(int i = 0; i < 256; i++)
+            {
+                var path = tempDirs + i.ToString();
+                if (System.IO.Directory.Exists(path))
+                {
+                    paths.Add(path);
+                } else
+                {
+                    break;
                 }
             }
             return paths;
@@ -184,6 +203,8 @@ namespace thermometer.CommandLineArguments
                         System.Console.WriteLine("--version : Display the current version of Thermometer.");
                         System.Console.WriteLine("--install-daemon | -id : Install and optionally enable the Thermometer daemon.");
                         System.Console.WriteLine("--mode | -m : Set a CPU mode like performance.");
+                        System.Console.WriteLine("--list-modes | -lm : See all supported CPU modes");
+                        System.Console.WriteLine("--temperature | -t : View temperatures of different devices.");
                         break;
                     case "--daemon":
                     case "-d":
@@ -253,6 +274,45 @@ namespace thermometer.CommandLineArguments
 
                         Console.WriteLine($"Available Modes: {string.Join(", ", availModes)}");
                         break;
+                    case "--temperature":
+                    case "-t":
+                        List<string> temperatures = GetTemperaturePaths();
+                        if(temperatures.Count == 0)
+                        {
+                            Console.WriteLine("ERROR: No HWMON device found.");
+                            Environment.Exit(1);
+                        }
+                        foreach(var path in temperatures)
+                        {
+                            var filePath = Path.Combine(path, "temp1_input");
+                            if (!File.Exists(filePath))
+                            {
+                                continue;
+                            }
+                            if (verbose)
+                            {
+                                Console.WriteLine($"VERBOSE: Reading {filePath}");
+                            }
+                            var namePath = Path.Combine(path, "name");
+                            if (verbose)
+                            {
+                                Console.WriteLine($"VERBOSE: Reading {namePath}");
+                            }
+                            var deviceName = File.ReadAllText(namePath).Trim() ?? "UNKNOWN DEVICE";
+                            var tempPath = Path.Combine(path, "temp1_input");
+                            if (verbose)
+                            {
+                                Console.WriteLine($"VERBOSE: Reading {tempPath}");
+                            }
+                            var tempInput = File.ReadAllText(tempPath) ?? "UNKNOWN TEMPERATURE";
+                            int.TryParse(tempInput.ToString(), out int temperatureResult);
+
+                            Console.WriteLine("------------------------------");
+                            Console.WriteLine($"Device Name: {deviceName}");
+                            Console.WriteLine($"Temperature: {temperatureResult / 1000}°C");
+                        }
+                        break;
+                        
 
                     default:
                         System.Console.WriteLine($"Unknown argument: {args[i]}");

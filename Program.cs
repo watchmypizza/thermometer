@@ -43,7 +43,7 @@ namespace thermometer.Program
         {
             if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
             {
-                if(Environment.UserName != "root")
+                if(!Environment.IsPrivilegedProcess)
                 {
                     System.Console.WriteLine("This action requires elevated privileges. Please run with sudo.");
                     Environment.Exit(1);
@@ -87,7 +87,7 @@ namespace thermometer.Program
 
                     existingConfig["package_manager"] = pkgM;
                     existingConfig["distribution"] = distroName;
-                    existingConfig["current_version"] = "1.4.4";
+                    existingConfig["current_version"] = "1.4.5";
                     var serializer = new SerializerBuilder()
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
                         .Build();
