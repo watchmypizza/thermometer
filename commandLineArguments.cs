@@ -30,7 +30,7 @@ namespace thermometer.CommandLineArguments
         public static int safeMinKhz { get; set; } = 0600000;
         public static int safeMaxKhz { get; set; } = 2500000;
         public static string cpuDirs { get; } = "/sys/devices/system/cpu/cpu";
-        public static string tempDirs { get; } = "/sys/class/hwmon/hwmon";
+        public static string tempDirs { get; } = "/sys/class/hwmon/";
         private static Dictionary<string, string> ReadConfig(string yamlFilePath)
         {
             if (!System.IO.File.Exists(yamlFilePath))
@@ -64,13 +64,10 @@ namespace thermometer.CommandLineArguments
 
             for(int i = 0; i < 256; i++)
             {
-                var path = tempDirs + i.ToString();
+                var path = Path.Combine(tempDirs, "hwmon" + i.ToString());
                 if (System.IO.Directory.Exists(path))
                 {
                     paths.Add(path);
-                } else
-                {
-                    break;
                 }
             }
             return paths;
@@ -121,30 +118,41 @@ namespace thermometer.CommandLineArguments
             System.IO.File.WriteAllText(yamlFilePath, yamlContent);
         }
 
-        private static double getKhz(double GHzValue)
+        private static bool verifyValue(double value)
         {
-            double KHzValue = GHzValue * 1000000;
+            List<string> paths = GetCpuFreqPaths();
+            var cpuMaxFreq = Path.Combine(paths[0], "cpuinfo_max_freq");
+            var cpuMinFreq = Path.Combine(paths[0], "cpuinfo_min_freq");
 
-            var paths = GetCpuFreqPaths();
-
-            foreach (var path in paths) {
-
-                var max_freq_info = System.IO.Path.Combine(path, "cpuinfo_max_freq");
-                var min_freq_info = System.IO.Path.Combine(path, "cpuinfo_min_freq");
-
-                var max_freq = double.Parse(System.IO.File.ReadAllText(max_freq_info));
-                var min_freq = double.Parse(System.IO.File.ReadAllText(min_freq_info));
-
-                if (KHzValue > max_freq || KHzValue < min_freq)
-                {
-                    Console.WriteLine("Invalid amount. QUITTING.");
-                    Console.WriteLine($"Allowed range: {min_freq / 1000000} GHz - {max_freq / 1000000} GHz");
-                    Environment.Exit(1);
-                }
-
-                return KHzValue;
+            if (verbose)
+            {
+                Console.WriteLine($"VERBOSE: Reading {cpuMaxFreq}");
             }
-            return -1;
+            var cpuMaxFreqContent = File.ReadAllText(cpuMaxFreq).Trim();
+            if(verbose)
+            {
+                Console.WriteLine($"VERBOSE: Reading {cpuMinFreq}");
+            }
+            var cpuMinFreqContent = File.ReadAllText(cpuMinFreq).Trim();
+            double.TryParse(cpuMaxFreqContent, out double cpuMax);
+            double.TryParse(cpuMinFreqContent, out double cpuMin);
+
+            if(value <= 0)
+            {
+                return true;
+            }
+
+            if(cpuMax < value || value < cpuMin)
+            {
+                if(verbose)
+                {
+                    Console.WriteLine($"VERBOSE: cpuMin: {cpuMin}, cpuMax: {cpuMax}, value (kHz): {value}");
+                }
+                Console.WriteLine($"Invalid Selection!\nValid range is from {Math.Round(cpuMin / 1000000, 2)}GHz - {Math.Round(cpuMax / 1000000, 2)}GHz");
+                Environment.Exit(1);
+            }
+            
+            return true;
         }
 
         private static void SetCpu(string targetFile, (string mode, double freq) data, Dictionary<string, string> config, string configKey, string yamlPath)
@@ -152,6 +160,9 @@ namespace thermometer.CommandLineArguments
             var (mode, freq) = data;
 
             string valueToWrite = freq> 0 ? ((long)freq).ToString() : mode;
+
+            double.TryParse(valueToWrite, out double parsedVal);
+            verifyValue(parsedVal);
 
             var paths = GetCpuFreqPaths();
 
