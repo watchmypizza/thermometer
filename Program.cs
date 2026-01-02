@@ -25,17 +25,6 @@ namespace thermometer.Program
                 Console.WriteLine("No CPU frequency directories found. Incompatible device?");
                 Environment.Exit(1);
             }
-            System.Console.WriteLine("Checking dependencies...");
-            // Check dependencies and look for matching packagemanager or OS
-            var operatingSystem = System.Environment.OSVersion.Platform;
-            System.Console.WriteLine($"Operating System: {operatingSystem}");
-            // Check distribution if Unix-based
-            if (operatingSystem == System.PlatformID.Unix)
-            {
-                var distro = checkDistro();
-                System.Console.WriteLine($"Distribution: {distro}");
-            }
-            System.Console.WriteLine("Thermometer CPU control started.");
             CommandLineArguments.CommandLineArgs.parseArgs(args);
         }
 
