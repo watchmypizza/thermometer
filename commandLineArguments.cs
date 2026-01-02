@@ -16,6 +16,10 @@ using System.Xml.Serialization;
 using System.Security;
 using System.Data.SqlTypes;
 using System.Reflection;
+using Microsoft.VisualBasic;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Specialized;
+using System.Globalization;
 
 namespace thermometer.CommandLineArguments
 {
@@ -70,6 +74,35 @@ namespace thermometer.CommandLineArguments
                 }
             }
             return paths;
+        }
+
+        public static List<double> getTemperatures(string path)
+        {
+            List<double> temperatureResult = [];
+            for(int i = 1; i < 256; i++)
+            {
+                if(verbose)
+                {
+                    Console.WriteLine($"VERBOSE: Attempting to read temp{i}_input");
+                }
+                var tempPath = Path.Combine(path, $"temp{i}_input");
+                if(!File.Exists(tempPath))
+                {
+                    if (verbose) {
+                        Console.WriteLine($"VERBOSE: Stopping and returning, temp{i}_input does not exist");
+                    }
+                    break;
+                }
+
+                if(verbose)
+                {
+                    Console.WriteLine($"VERBOSE: Reading temp{i}_input");
+                }
+                var tempInput = File.ReadAllText(tempPath) ?? "UNKNOWN TEMPERATURE";
+                double.TryParse(tempInput.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out double result);
+                temperatureResult.Add(result);
+            }
+            return temperatureResult;
         }
 
         public static bool? checkDirectory(string directory)
@@ -301,17 +334,15 @@ namespace thermometer.CommandLineArguments
                                 Console.WriteLine($"VERBOSE: Reading {namePath}");
                             }
                             var deviceName = File.ReadAllText(namePath).Trim() ?? "UNKNOWN DEVICE";
-                            var tempPath = Path.Combine(path, "temp1_input");
-                            if (verbose)
-                            {
-                                Console.WriteLine($"VERBOSE: Reading {tempPath}");
-                            }
-                            var tempInput = File.ReadAllText(tempPath) ?? "UNKNOWN TEMPERATURE";
-                            double.TryParse(tempInput.ToString(), out double temperatureResult);
+
+                            List<double> temps = getTemperatures(path);
 
                             Console.WriteLine("------------------------------");
                             Console.WriteLine($"Device Name: {deviceName}");
-                            Console.WriteLine($"Temperature: {temperatureResult / 1000}°C");
+                            foreach(var temp in temps)
+                            {
+                                Console.WriteLine($"Temperature: {temp / 1000}°C");
+                            }
                         }
                         break;
                         
