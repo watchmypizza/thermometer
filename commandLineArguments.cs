@@ -365,7 +365,8 @@ namespace thermometer.CommandLineArguments
                         foreach(string path in AvailPaths)
                         {
                             string newP = cpu0 + path;
-
+                            string entry = infoToPrint[curIdx];
+                            curIdx++;
                             if(!File.Exists(newP))
                             {
                                 if(verbose)
@@ -374,8 +375,6 @@ namespace thermometer.CommandLineArguments
                                 }
                                 continue;
                             }
-                            string entry = infoToPrint[curIdx];
-                            curIdx++;
                             string text = File.ReadAllText(newP).Trim().Replace(" ", ", ");
                             double.TryParse(text, out var result);
 
