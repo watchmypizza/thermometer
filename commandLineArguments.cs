@@ -375,7 +375,13 @@ namespace thermometer.CommandLineArguments
                                 }
                                 continue;
                             }
-                            string text = File.ReadAllText(newP).Trim().Replace(" ", ", ");
+                            string text = "";
+                            try {
+                                text = File.ReadAllText(newP).Trim().Replace(" ", ", ");
+                            } catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                            }
                             double.TryParse(text, out var result);
 
                             if(result != 0)
