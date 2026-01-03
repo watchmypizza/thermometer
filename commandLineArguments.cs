@@ -381,7 +381,7 @@ namespace thermometer.CommandLineArguments
 
                             if(result != 0)
                             {
-                                Console.WriteLine(entry + result / 1000000 + "GHz");
+                                Console.WriteLine(entry + Math.Round(result / 1000000, 2) + "GHz");
                                 continue;
                             }
 
