@@ -7,6 +7,11 @@
     <Nullable>enable</Nullable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright 2026 watchmypizza</Copyright>
+    <StripSymbols>true</StripSymbols>
+    <PublishSingleFile>true</PublishSingleFile> 
+    <OptimizationPreference>Size</OptimizationPreference>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
