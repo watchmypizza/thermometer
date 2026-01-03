@@ -356,7 +356,38 @@ namespace thermometer.CommandLineArguments
                             }
                         }
                         break;
-                        
+                    case "--status":
+                    case "-s":
+                        string cpu0 = "/sys/devices/system/cpu/cpu0/cpufreq/";
+                        List<string> AvailPaths = ["scaling_max_freq", "scaling_min_freq", "cpuinfo_max_freq", "cpuinfo_min_freq", "scaling_available_governors", "scaling_governor", "cpuinfo_transition_latency", "cpuinfo_avg_freq"];
+                        List<string> infoToPrint = ["Current max frequency: ", "Current min frequency: ", "Max supported frequency: ", "Min supported frequency: ", "Available modes: ", "Current mode: ", "Transition latency: ", "Average frequency: "];
+                        int curIdx = 0;
+                        foreach(string path in AvailPaths)
+                        {
+                            string newP = cpu0 + path;
+
+                            if(!File.Exists(newP))
+                            {
+                                if(verbose)
+                                {
+                                    Console.WriteLine($"VERBOSE: File {newP} does not exist, moving on.");
+                                }
+                                continue;
+                            }
+                            string entry = infoToPrint[curIdx];
+                            curIdx++;
+                            string text = File.ReadAllText(newP).Trim().Replace(" ", ", ");
+                            double.TryParse(text, out var result);
+
+                            if(result != 0)
+                            {
+                                Console.WriteLine(entry + result / 1000000 + "GHz");
+                                continue;
+                            }
+
+                            Console.WriteLine(entry + text);
+                        }
+                        break;
 
                     default:
                         System.Console.WriteLine($"Unknown argument: {args[i]}");
