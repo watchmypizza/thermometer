@@ -381,7 +381,7 @@ namespace thermometer.CommandLineArguments
                             Console.WriteLine($"Device Name: {deviceName}");
                             foreach(var temp in temps)
                             {
-                                if(verbose) 
+                                if(verbose)  
                                 {
                                     Console.WriteLine($"VERBOSE: {string.Join(", ", listIdx)}");
                                 }
