@@ -20,6 +20,7 @@ using Microsoft.VisualBasic;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace thermometer.CommandLineArguments
 {
@@ -100,6 +101,31 @@ namespace thermometer.CommandLineArguments
                 temperatureResult.Add(result);
             }
             return temperatureResult;
+        }
+
+        public static List<string> getTemperatureDeviceLabel(string path)
+        {
+            List<string> devNames = [];
+
+            if(!Directory.Exists(path))
+            {
+                return ["Temperature"];
+            }
+
+            for(int i = 1; i < 256; i++)
+            {
+                var nP = Path.Combine(path, $"temp{i}_label");
+
+                if(!File.Exists(nP))
+                {
+                    return devNames.Count > 0 ? devNames : ["Temperature"];
+                }
+
+                var fT = File.ReadAllText(nP).Trim();
+                devNames.Add(fT.ToString());
+            }
+
+            return devNames;
         }
 
         public static bool? checkDirectory(string directory)
@@ -346,13 +372,21 @@ namespace thermometer.CommandLineArguments
                             }
                             var deviceName = File.ReadAllText(namePath).Trim() ?? "UNKNOWN DEVICE";
 
+                            List<string> compositeName = getTemperatureDeviceLabel(path);
                             List<double> temps = getTemperatures(path);
+
+                            int listIdx = 0;
 
                             Console.WriteLine("------------------------------");
                             Console.WriteLine($"Device Name: {deviceName}");
                             foreach(var temp in temps)
                             {
-                                Console.WriteLine($"Temperature: {temp / 1000}°C");
+                                if(verbose) 
+                                {
+                                    Console.WriteLine($"VERBOSE: {string.Join(", ", listIdx)}");
+                                }
+                                Console.WriteLine($"{compositeName[listIdx]}: {temp / 1000}°C");
+                                listIdx++;
                             }
                         }
                         break;
