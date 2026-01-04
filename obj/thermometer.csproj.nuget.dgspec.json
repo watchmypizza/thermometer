@@ -44,25 +44,15 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
-            "Avalonia": {
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
               "target": "Package",
-              "version": "[11.3.10, )"
+              "version": "[10.0.0, )",
+              "autoReferenced": true
             },
-            "Avalonia.Desktop": {
+            "YamlDotNet": {
               "target": "Package",
-              "version": "[11.3.10, )"
-            },
-            "Avalonia.Diagnostics": {
-              "target": "Package",
-              "version": "[11.3.10, )"
-            },
-            "Avalonia.Fonts.Inter": {
-              "target": "Package",
-              "version": "[11.3.10, )"
-            },
-            "Avalonia.Themes.Fluent": {
-              "target": "Package",
-              "version": "[11.3.10, )"
+              "version": "[16.3.0, )"
             }
           },
           "imports": [
@@ -79,6 +69,18 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[10.0.0, 10.0.0]"
+            },
+            {
+              "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
+              "version": "[10.0.0, 10.0.0]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.linux-x64",
+              "version": "[10.0.0, 10.0.0]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.linux-x64",
               "version": "[10.0.0, 10.0.0]"
             }
           ],
@@ -362,6 +364,11 @@
             "System.Xml.XPath": "(,4.3.32767]",
             "System.Xml.XPath.XDocument": "(,5.0.32767]"
           }
+        }
+      },
+      "runtimes": {
+        "linux-x64": {
+          "#import": []
         }
       }
     }

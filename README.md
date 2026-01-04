@@ -18,7 +18,8 @@ $ cd thermometer
 
 $ sudo pacman -S dotnet-sdk dotnet-runtime
 
-$ dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true```
+$ dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true
+```
 
 ### Roadmap
 
